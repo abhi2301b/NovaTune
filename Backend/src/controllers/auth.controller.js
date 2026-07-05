@@ -24,7 +24,12 @@ async function registerUser(req, res) {
         role: user.role 
     },  process.env.JWT_SECRET)
 
-    res.cookie('token', token);
+    const isProduction = process.env.NODE_ENV === "production";
+    res.cookie('token', token, {
+        httpOnly: true,
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction,
+    });
 
     res.status(201).json({ 
         message: 'User registered successfully',
@@ -59,10 +64,11 @@ async function loginUser(req, res) {
         role: user.role 
     }, process.env.JWT_SECRET);
 
+    const isProduction = process.env.NODE_ENV === "production";
     res.cookie("token", token, {
         httpOnly: true,
-        sameSite: "lax",
-        secure: false, 
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction, 
     });
 
     res.status(200).json({ 
@@ -77,10 +83,11 @@ async function loginUser(req, res) {
 }
 
 async function logoutUser(req, res) {
+    const isProduction = process.env.NODE_ENV === "production";
     res.clearCookie("token", {
         httpOnly: true,
-        sameSite: "lax",
-        secure: false,
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction,
     });
     res.status(200).json({ message: 'Logout successful' });
 }
